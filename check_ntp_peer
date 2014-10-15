@@ -1,0 +1,31 @@
+#!/bin/sh
+# Moviuro <moviuro+nagios[at]gmail.com>
+
+# This requires rdate (available in OpenBSD, FreeBSD; I don't care about Linuses)
+
+state_ok=0
+#state_warning=1
+state_critical=2
+#state_unknown=3
+state_dependent=4
+
+case "$1" in
+    -H)
+        shift
+        ;;
+esac
+
+if [ -z "$1" ]; then
+    echo "requires a hostname"
+    exit "$state_dependent"
+fi
+
+rdate -p "$1" >/dev/null 2>&1
+
+if [ "$?" -gt 0 ]; then
+    echo "NTP CRITICAL - rdate $1 failed"
+    exit "$state_critical"
+fi
+
+echo "NTP OK - server is running"
+exit "$state_ok"

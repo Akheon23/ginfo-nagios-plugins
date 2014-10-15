@@ -1,0 +1,45 @@
+#!/bin/sh
+# Moviuro, <moviuro+nagios[at]gmail.com>
+# We try to fetch a file that does not exist on the server:
+# > if I get a file not found, then it works.
+
+# Defaults
+port=69
+file=dummy-file-that-does-not-exist
+
+state_ok=0
+#state_warning=1
+state_critical=2
+state_unknown=3
+state_dependent=4
+
+# parsing options
+while [ $# -gt 1 ]; do
+    case $1 in
+        -H|-host)
+            host="$2"
+            ;;
+        -p|-port)
+            port="$2"
+            ;;
+    esac
+    shift 2
+done
+
+if [ -z "$host" ]; then
+    echo "check_tftp requires a -H option"
+    exit "$state_dependent"
+fi
+
+result="$(printf 'get %s /dev/null\n' "$file" | tftp "$host" "$port" 2>&1 | sed '1d;2q')"
+
+case $result in 
+    *"File not found"*)
+        echo "TFTPd OK - answer from server"
+        exit "$state_ok"
+        ;;
+    *)
+        echo "TFTPd CRITICAL - $result"
+        exit "$state_critical"
+        ;;
+esac

@@ -1,0 +1,54 @@
+#!/bin/sh
+# Moviuro <moviuro[at]gmail.com>
+
+# requires sudo privileges for _nrpe user
+#
+# Cmnd_Alias ZPOOLSTATUS = /sbin/bioctl sd0
+# _nrpe	ALL=ZPOOLSTATUS, NOPASSWD: ZPOOLSTATUS
+
+state_ok=0
+#state_warning=1
+state_critical=2
+state_unknown=3
+state_dependent=4
+
+case "$1" in
+    -p)
+        shift
+        ;;
+esac
+
+pool="$1"
+
+if [ -z "$pool" ]; then
+    echo "requires pool"
+    exit "$state_dependent"
+fi
+
+result=$(zpool status "$pool")
+case "$result" in
+    *DEGRADED*)
+        echo "ZPOOL DEGRADED - $pool"
+        exit "$state_warning"
+        ;;
+    *FAULTED*)
+        echo "ZPOOL FAULTED - $pool"
+        exit "$state_critical"
+        ;;
+    *OFFLINE*)
+        echo "ZPOOL OFFLINE - $pool, requested by a zpool offline"
+        exit "$state_warning"
+        ;;
+    *REMOVED*)
+        echo "ZPOOL REMOVED - $pool"
+        exit "$state_warning"
+        ;;
+    *UNAVAIL*)
+        echo "ZPOOL UNAVAILABLE - $pool"
+        exit "$state_critical"
+        ;;
+    *ONLINE*)
+        echo "ZPOOL ONLINE - $pool"
+        exit "$state_ok"
+        ;;
+esac

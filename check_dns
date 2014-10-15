@@ -1,0 +1,41 @@
+#!/bin/sh
+# Moviuro, <moviuro+nagios[at]gmail.com>
+# We try to get the address of a local server
+
+# Defaults
+local_server=frigg
+
+state_ok=0
+#state_warning=1
+state_critical=2
+state_unknown=3
+state_dependent=4
+
+case $1 in
+    -H|-host)
+        shift
+        ;;
+esac
+
+dns_server="$1"
+
+if [ -z "$dns_server" ]; then
+    echo "check_dns requires a -H option"
+    exit "$state_dependent"
+fi
+
+result=$(host "$local_server" "$dns_server" 2>&1) >/dev/null 2>&1
+case "$result" in
+    *Using*)
+        echo "DNS OK"
+        exit "$state_ok"
+        ;;
+    *"not found"*|*"no servers could be reached"*)
+        echo "DNS CRITICAL - the server did not answer"
+        exit "$state_critical"
+        ;;
+    *)
+        echo "DNS UNKNOWN - got an unknown answer: $result"
+        exit "$state_unknown"
+        ;;
+esac

@@ -1,0 +1,30 @@
+#!/bin/sh
+# Moviuro <moviuro+nagios[at]gmail.com>
+
+# check_ipsec -f <from> -t <to>
+
+state_ok=0
+#state_warning=1
+state_critical=2
+#state_unknown=3
+#state_dependent=4
+
+while [ $# -gt 1 ]; do
+    case $1 in
+        -f|-from)
+            from="$2"
+            ;;
+        -t|-to)
+            to="$2"
+            ;;
+    esac
+    shift 2
+done
+
+if sudo ipsecctl -s sa | grep -q "$from to $to" 2>&1; then
+    echo "IPSEC OK - link between $from and $to exists"
+    return "$state_ok"
+fi
+
+echo "IPSEC CRITICAL - link between $from and $to doesn't exist"
+return "$state_critical"

@@ -1,0 +1,45 @@
+#!/bin/sh
+# Moviuro <moviuro[at]gmail.com>
+state_ok=0
+state_warning=1
+state_critical=2
+state_unknown=3
+state_dependent=4
+
+crit=1
+
+case "$1" in
+    -d)
+        disk="$2"
+        shift 2
+        ;;
+    -c)
+        crit="$2"
+        shift 2
+        ;;
+esac
+
+if [ -z "$disk" ]; then
+    echo "requires disk"
+    exit "$state_dependent"
+fi
+
+result=$(sudo bioctl "$disk" 2>&1)
+case "$result" in
+    *denied*)
+        echo "RAID UNKNOWN $disk - $(whoami) is not allowed to run bioctl"
+        exit $state_unknown
+        ;;
+    *Degraded*)
+        broken=$(echo "$result" | grep Offline | wc -l)
+        if [ "$broken" -gt "$crit" ]; then
+            echo "RAID CRITICAL $disk - $broken disks are Offline"
+            exit $state_critical
+        fi
+        echo "RAID WARNING $disk - $broken disks are Offline"
+        exit "$state_warning"
+        ;;
+esac
+
+echo "RAID OK $disk"
+exit $state_ok
