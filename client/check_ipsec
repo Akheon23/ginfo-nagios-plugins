@@ -3,6 +3,22 @@
 
 # check_ipsec -f <from> -t <to>
 
+# requires sudo authorization for the nrpe user on command "ipsecctl -s sa"
+# /etc/sudoers
+# Cmnd_Alias IPSECSTATUS = /sbin/ipsecctl -s sa
+# # replace _nrpe with the actual name of the NRPE user
+# _nrpe   ALL=IPSECSTATUS, NOPASSWD: IPSECSTATUS
+
+# [...]/nrpe.cfg
+# command[check_ipsec]=/<path>/ginfo-nagios-plugins/client/check_ipsec -f <from> -t <to>
+
+# define service{
+#        use                     <template>
+#        host_name               <hostname>
+#        service_description     IPSEC
+#        check_command           check_nrpe!check_ipsec
+# }
+
 state_ok=0
 #state_warning=1
 state_critical=2

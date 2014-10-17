@@ -1,9 +1,21 @@
 #!/bin/sh
 # Moviuro, <moviuro+nagios[at]gmail.com>
-# We try to get the address of a local server
+# We try to get the address of a server
+
+# define command{
+#        command_name    check_dns
+#        command_line    $USER1$/<folder>/check_dns -H $HOSTADDRESS$
+# }
+
+# define service{
+#        use                     <your template>
+#        host_name               <DNS server>
+#        service_description     DNS
+#        check_command           check_dns
+# }
 
 # Defaults
-local_server=frigg
+local_server=aRandomName
 
 state_ok=0
 #state_warning=1

@@ -3,6 +3,18 @@
 # We try to fetch a file that does not exist on the server:
 # > if I get a file not found, then it works.
 
+# define command{
+#        command_name    check_tftp
+#        command_line    $USER1$/ginfo-nagios-plugins/server/check_tftp -H $HOSTADDRESS$ -p $ARG1$
+# }
+
+# define service{
+#        use                     <template>
+#        host_name               <hostname>
+#        service_description     TFTPd
+#        check_command           check_tftp!69
+# }
+
 # Defaults
 port=69
 file=dummy-file-that-does-not-exist

@@ -4,6 +4,18 @@
 # Michael Hodges <michael@va.com.au> 2011-03-04
 # Modified version of check_smb by Dave Love <fx@gnu.org>
 
+# define command{
+#        command_name    check_smb_share
+#        command_line    $USER1$/ginfo-nagios-plugins/server/check_smb_share -H $HOSTADDRESS$ -s $ARG1$
+# }
+
+# define service{
+#        use                     <template>
+#        host_name               <hostname>
+#        service_description     Samba <share-name>
+#        check_command           check_smb_share!<share-name>
+# }
+
 REVISION=1.0
 PROGNAME=`/usr/bin/basename $0`
 PROGPATH=`echo $0 | sed -e 's,[\\/][^\\/][^\\/]*$,,'`

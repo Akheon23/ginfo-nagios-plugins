@@ -1,12 +1,33 @@
 #!/bin/sh
 # Moviuro <moviuro[at]gmail.com>
+
+# check_raid_obsd -d <disk> [-c <num>]
+
+# requires sudo authorization for the nrpe user on command "bioctl <disk>"
+# /etc/sudoers
+# Cmnd_Alias RAIDSTATUS = /sbin/bioctl <disk>
+# # replace _nrpe with the actual name of the NRPE user
+# _nrpe   ALL=RAIDSTATUS, NOPASSWD: RAIDSTATUS
+
+# [...]/nrpe.cfg
+# command[check_raid_sd0]=/<path>/ginfo-nagios-plugins/client/check_raid_obsd -d <drive>
+
+# define service{
+#        use                     <template>
+#        host_name               <hostname>
+#        service_description     RAID health
+#        notification_interval   1440                            ; Once every 24 hours, because it's not easy to change
+#        check_command           check_nrpe!check_raid_<drive>
+# }
+
 state_ok=0
 state_warning=1
 state_critical=2
 state_unknown=3
 state_dependent=4
 
-crit=1
+crit=1 # if the number of dead drives is > $crit,
+       # then the service will return "CRITICAL"
 
 case "$1" in
     -d)

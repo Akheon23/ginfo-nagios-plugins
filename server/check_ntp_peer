@@ -1,7 +1,23 @@
 #!/bin/sh
 # Moviuro <moviuro+nagios[at]gmail.com>
 
-# This requires rdate (available in OpenBSD, FreeBSD; I don't care about Linuses)
+# This requires rdate (available in OpenBSD, FreeBSD)
+# This plugin is made to work with all ntp servers, even the ones using openntpd
+# that do not give any other information than... well, you know... time.
+
+# FIXME Linuses
+
+# define command{
+#        command_name    check_ntp_peer
+#        command_line    $USER1$/ginfo-nagios-plugins/server/check_ntp_peer -H $HOSTADDRESS$
+# }
+
+# define service{
+#        use                     <template>
+#        host_name               <hostname>
+#        service_description     NTPd
+#        check_command           check_ntp_peer
+# }
 
 state_ok=0
 #state_warning=1
