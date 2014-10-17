@@ -8,7 +8,7 @@ REVISION=1.0
 PROGNAME=`/usr/bin/basename $0`
 PROGPATH=`echo $0 | sed -e 's,[\\/][^\\/][^\\/]*$,,'`
 
-. $PROGPATH/../utils.sh # depends on where you put the very script mine is in $USER1$/plugins
+. $PROGPATH/../../utils.sh # depends on where you put the very script mine is in $USER1$/plugins
 
 usage () {
     echo "\
