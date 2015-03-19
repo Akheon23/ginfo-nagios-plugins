@@ -1,0 +1,66 @@
+#!/bin/sh
+# Moviuro <moviuro[at]gmail.com>
+
+# [...]/nrpe.cfg
+# command[check_geom_<geom name>]=/<path>/ginfo-nagios-plugins/client/check_geom (-m|-s) <geom name>
+
+# define service{
+#        use                     <template>
+#        host_name               <hostname>
+#        service_description     GEOM (mirror|stripe) <GEOM name> status
+#        check_command           check_nrpe!check_geom_<geom name>
+# }
+
+state_ok=0
+state_warning=1
+state_critical=2
+state_unknown=3
+state_dependent=4
+
+case "$1" in
+    -m)
+        kind=mirror
+        ;;
+    -s)
+        kind=stripe
+        ;;
+esac
+
+geom_name="$2"
+
+if [ -z "geom_name" ]; then
+    echo "requires a GEOM name"
+    exit "$state_dependent"
+fi
+
+result="$(geom "$kind" status "$geom_name" | grep "$geom_name")"
+case "$kind" in
+    mirror)
+        case "$result" in
+            *COMPLETE*)
+                echo "GEOM COMPLETE - $kind $geom_name"
+                exit "$state_ok"
+                ;;
+            *DEGRADED*)
+                echo "GEOM DEGRADED - $kind $geom_name"
+                exit "$state_warning"
+                ;;
+            *)
+            # FIXME
+                echo "GEOM UNKNOWN STATUS - $kind $geom_name - $result"
+                exit "$state_unknown"
+        esac
+        ;;
+    stripe)
+        case "$result" in
+            *UP*)
+                echo "GEOM UP - $kind $geom_name"
+                exit "$state_ok"
+                ;;
+            *)
+            # FIXME
+                echo "GEOM UNKNOWN STATUS - $kind $geom_name - $result"
+                exit "$state_unknown"
+        esac
+        ;;
+esac
