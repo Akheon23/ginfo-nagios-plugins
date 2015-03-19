@@ -30,7 +30,7 @@ if [ -z "$pool" ]; then
     exit "$state_dependent"
 fi
 
-result=$(zpool status "$pool")
+result=$(zpool status "$pool"|grep "state:")
 case "$result" in
     *DEGRADED*)
         echo "ZPOOL DEGRADED - $pool"
