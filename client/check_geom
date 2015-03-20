@@ -45,8 +45,11 @@ case "$kind" in
                 echo "GEOM DEGRADED - $kind $geom_name"
                 exit "$state_warning"
                 ;;
+            *STARTING*)
+                echo "GEOM STARTING - $kind $geom_name"
+                exit "$state_unknown"
+                ;;
             *)
-            # FIXME
                 echo "GEOM UNKNOWN STATUS - $kind $geom_name - $result"
                 exit "$state_unknown"
         esac
@@ -57,8 +60,11 @@ case "$kind" in
                 echo "GEOM UP - $kind $geom_name"
                 exit "$state_ok"
                 ;;
+            *DOWN*)
+                echo "GEOM DOWN - $kind $geom_name"
+                exit "$state_critical"
+                ;;
             *)
-            # FIXME
                 echo "GEOM UNKNOWN STATUS - $kind $geom_name - $result"
                 exit "$state_unknown"
         esac
