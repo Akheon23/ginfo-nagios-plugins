@@ -28,7 +28,7 @@ esac
 
 geom_name="$2"
 
-if [ -z "geom_name" ]; then
+if [ -z "$geom_name" ]; then
     echo "requires a GEOM name"
     exit "$state_dependent"
 fi
