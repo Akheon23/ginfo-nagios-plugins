@@ -45,7 +45,7 @@ if [ -z "$disk" ]; then
     exit "$state_dependent"
 fi
 
-result=$(sudo bioctl "$disk" 2>&1)
+result="$(sudo bioctl "$disk" 2>&1)"
 case "$result" in
     *denied*)
         echo "RAID UNKNOWN $disk - $(whoami) is not allowed to run bioctl"
