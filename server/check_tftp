@@ -17,10 +17,12 @@
 
 # Defaults
 port=69
-file=dummy-file-that-does-not-exist
+file=gpxelinux.0
+shasum=784d72d98bd2eaf70e64019d5a1adaf2ad7155be2329865b6c382f1dd9756d81fac6fca8dbd5c5c91770bf641ac68055ce9f698a13400cbaf4f46be5e41aa207
+emptysha=cf83e1357eefb8bdf1542850d66d8007d620e4050b5715dc83f4a921d36ce9ce47d0d13c5d85f2b0ff8318d2877eec2f63b931bd47417a81a538327af927da3e
 
 state_ok=0
-#state_warning=1
+state_warning=1
 state_critical=2
 state_unknown=3
 state_dependent=4
@@ -34,6 +36,12 @@ while [ $# -gt 1 ]; do
         -p|-port)
             port="$2"
             ;;
+        -f|-file)
+            file="$2"
+            ;;
+        -s|-sha)
+            shasum="$2"
+            ;;
     esac
     shift 2
 done
@@ -43,15 +51,27 @@ if [ -z "$host" ]; then
     exit "$state_dependent"
 fi
 
-result="$(printf 'get %s /dev/null\n' "$file" | tftp "$host" "$port" 2>&1 | sed '1d;2q')"
+tmp="$(mktemp -d)"
+result="$(printf 'get %s %s\n' "$file" "$tmp/$file" | tftp "$host" "$port" 2>&1)"
+calculated="$(sha512 -q "$tmp/$file")"
 
-case $result in 
+if [ "$calculated" = "$shasum" ]; then
+    echo "TFTPd OK - $file got DLed and matches checksum"
+    ret="$state_ok"
+elif [ "$calculated" = "$emptysha" ]; then
+    echo "TFTPd CRITICAL - no answer from server!"
+    ret="$state_warning"
+else
+    case "$result" in
     *"File not found"*)
-        echo "TFTPd OK - answer from server"
-        exit "$state_ok"
+        echo "TFTPd WARNING - $file not found"
+        ret="$state_warning"
         ;;
     *)
-        echo "TFTPd CRITICAL - $result"
-        exit "$state_critical"
-        ;;
-esac
+        echo "TFTPd WARNING - $file has unexpected SHA"
+        ret="$state_warning"
+    esac
+fi
+
+rm -rf "$tmp"
+exit "$ret"
